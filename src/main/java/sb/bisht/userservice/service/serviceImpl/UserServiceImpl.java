@@ -11,6 +11,7 @@ import sb.bisht.userservice.model.UserSearchCriteria;
 import sb.bisht.userservice.service.UserService;
 
 import javax.transaction.Transactional;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.*;
 
 @Service(value = "userService")
@@ -30,7 +31,6 @@ public class UserServiceImpl implements UserService {
 //		principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 //		System.out.println("Created By :"+principal.getUser().getUserName());
 		user.setRecordCount(0L);
-		user.setCreatedBy(1L);
 		user.setCreatedOn(new Date());
 		return Mono.just(userRepository.save(user));
 	}
@@ -39,8 +39,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public Mono<User> update(User user) {
 //		principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		user.setRecordCount(1L);
-		user.setModifiedBy(1L);
+		user.setRecordCount(user.getRecordCount()+1L);
 		user.setModifiedOn(new Date());
 		return Mono.just(userRepository.save(user));
 	}
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Flux<User> findUsers(UserSearchCriteria searchCriteria) {
-		
+		System.out.println("************** Will this get printed ***************");
 		//userName, fullName, country
 		Map<String, String> mapCriteria = new HashMap<String, String>();
 		if(searchCriteria.getUserName()!=null) {
@@ -70,28 +69,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Mono<User> getUser(String userName) throws UserNotFoundException {
+		System.out.println("Inside getUser method");
 		User user = userRepository.findByUserName(userName);
 		if(user == null){
 			throw new UserNotFoundException("Invalid User");
 		}
 		return Mono.just(user);
 	}
-
-	/*@Override
-	public UserPrincipal loadUserByUsername(String userName) throws UsernameNotFoundException {
-		System.out.println("InsideXXXXXXXXXXXXX "+userName);
-		User user = userRepository.findByUserName(userName) ;
-		if(user == null){
-			throw new UsernameNotFoundException("Invalid username or password.");
-		}
-		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-		List<Role> roles = userRepository.findRoleByUserName(userName);
-		for (Role role : roles) {
-			System.out.println("Role is "+role.getRoles());
-			GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_"+role.getRoles());
-			authorities.add(authority);
-		}
-		return new UserPrincipal(user, authorities);
-	}*/
 
 }

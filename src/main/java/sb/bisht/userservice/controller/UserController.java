@@ -1,10 +1,10 @@
 package sb.bisht.userservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,6 +18,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Value("${m2.path}")
+    String m2Path;
 
     @PostMapping("/saveUser")
     public ResponseEntity<Mono<User>> saveUser(@RequestBody User user) {
@@ -33,6 +36,7 @@ public class UserController {
 
     @PostMapping("/getUsers")
     public Flux<User> getUsers(@RequestBody UserSearchCriteria criteria) {
+        System.out.println("************** Will this get printed ***************");
         return userService.findUsers(criteria);
     }
 
@@ -44,5 +48,10 @@ public class UserController {
         } catch (UserNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @GetMapping("/m2Path")
+    public String getM2Path(){
+        return m2Path;
     }
 }
